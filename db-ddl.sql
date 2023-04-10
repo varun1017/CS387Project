@@ -14,17 +14,21 @@ create table product
         owner_id    varchar(9),
         name    varchar(20) not null,
         desc    varchar(100),
+        category varchar(30),
         buyer_id    varchar(9),
         price       varchar(7),
         expiry_date varchar(20),
-        primary key (ID)
+        product_images JSON CHECK (JSON_LENGTH(product_images) <=6)
+        primary key (ID),
+        foreign key(owner_id) references user(ID),
+        foreign key(buyer_id) references user(ID),
     );
 
-CREATE TABLE product_images
-    (
-        image_id int not null,
-        product_id varchar(5),
-        image BLOB,
-        primary key(image_id),
-        foreign key(product_id) references product(ID)
-    );
+-- CREATE TABLE product_images
+--     (
+--         image_id int not null,
+--         product_id varchar(5),
+--         image BLOB,
+--         primary key(image_id),
+--         foreign key(product_id) references product(ID)
+--     );
