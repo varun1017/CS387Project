@@ -1,6 +1,6 @@
 const Yup = require("yup");
 
-const formSchema = Yup.object({
+const formSchema2 = Yup.object({
   userid: Yup.string()
     .required("Userid required")
     .min(9, "Userid too short")
@@ -25,7 +25,6 @@ const formSchema = Yup.object({
     .required("Useraddress required")
     .min(1, "Useraddress too short")
     .max(50, "Useraddress too long"),
-  
 });
 
-module.exports = { formSchema };
+module.exports = { formSchema2 };

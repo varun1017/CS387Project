@@ -1,24 +1,23 @@
-import { ArrowBackIcon } from "@chakra-ui/icons";
 import { Button, ButtonGroup, Heading, Text, VStack } from "@chakra-ui/react";
-import { formSchema2 } from "./signupform";
+import { formSchema1 } from "./loginform";
 import { Form, Formik } from "formik";
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router";
 import { AccountContext } from "../AccountContext";
 import TextField from "./TextField";
 
-const SignUp = () => {
+const Login = () => {
   const { setUser } = useContext(AccountContext);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   return (
     <Formik
-      initialValues={{ userid: "", email: "", password: "", username: "", phnum: "", useraddress: ""}}
-      validationSchema={formSchema2}
+      initialValues={{ userid: "", password: "" }}
+      validationSchema={formSchema1}
       onSubmit={(values, actions) => {
         const vals = { ...values };
         actions.resetForm();
-        fetch("http://localhost:4000/auth/signup", {
+        fetch("http://localhost:4000/auth/login", {
           method: "POST",
           credentials: "include",
           headers: {
@@ -54,23 +53,15 @@ const SignUp = () => {
         h="100vh"
         spacing="1rem"
       >
-        <Heading>Sign Up</Heading>
+        <Heading>Log In</Heading>
         <Text as="p" color="red.500">
           {error}
         </Text>
-
         <TextField
           name="userid"
           placeholder="Enter userid"
           autoComplete="off"
           label="Userid"
-        />
-
-        <TextField
-          name="email"
-          placeholder="Enter email"
-          autoComplete="off"
-          label="Email"
         />
 
         <TextField
@@ -81,38 +72,15 @@ const SignUp = () => {
           type="password"
         />
 
-        <TextField
-          name="username"
-          placeholder="Enter username"
-          autoComplete="off"
-          label="Username"
-        />
-
-        <TextField
-          name="phnum"
-          placeholder="Enter phoe number"
-          autoComplete="off"
-          label="Phone number"
-        />
-
-        <TextField
-          name="useraddress"
-          placeholder="Enter useraddress"
-          autoComplete="off"
-          label="Useraddress"
-        />
-
         <ButtonGroup pt="1rem">
           <Button colorScheme="teal" type="submit">
-            Create Account
+            Log In
           </Button>
-          <Button onClick={() => navigate("/")} leftIcon={<ArrowBackIcon />}>
-            Back
-          </Button>
+          <Button onClick={() => navigate("/register")}>Create Account</Button>
         </ButtonGroup>
       </VStack>
     </Formik>
   );
 };
 
-export default SignUp;
+export default Login;
