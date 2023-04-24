@@ -12,7 +12,7 @@ const Login = () => {
   const navigate = useNavigate();
   return (
     <Formik
-      initialValues={{ userid: "", password: "" }}
+      initialValues={{ userid: "200050073", password: "qwerty" }}
       validationSchema={formSchema1}
       onSubmit={(values, actions) => {
         const vals = { ...values };

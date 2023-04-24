@@ -6,6 +6,7 @@ import Login from "./Login/Login";
 import SignUp from "./Login/SignUp";
 import PrivateRoutes from "./PrivateRoutes";
 import Home from "./Home";
+import Sell from "./Sell";
 
 
 const Views = () => {
@@ -21,6 +22,7 @@ const Views = () => {
       
       <Route element={<PrivateRoutes />}>
         <Route path="/home" element={<Home />} />
+        <Route path="/sell" element={<Sell />} />
         {/* <Route path="/home/registration" element={<Registration />} />
         <Route path="/course/running" element={<RunCourse />} />
         <Route path="/course/running/:dept_name" element={<RunDeptCourse />} />
