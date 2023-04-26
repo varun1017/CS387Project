@@ -7,6 +7,12 @@ import SignUp from "./Login/SignUp";
 import PrivateRoutes from "./PrivateRoutes";
 import Home from "./Home";
 import Sell from "./Sell";
+import BuyProds from "./BuyProds";
+import MyProds from "./MyProds";
+import InProdReq from "./InProdReq";
+import OutProdReq from "./OutProdReq";
+import BuyedProds from "./BuyedProds";
+import SoldProds from "./SoldProds";
 
 
 const Views = () => {
@@ -23,6 +29,12 @@ const Views = () => {
       <Route element={<PrivateRoutes />}>
         <Route path="/home" element={<Home />} />
         <Route path="/sell" element={<Sell />} />
+        <Route path="/products/buy" element={<BuyProds />} />
+        <Route path="/myproducts" element={<MyProds />} />
+        <Route path="/myproducts/requests" element={<InProdReq />} />
+        <Route path="/products/myrequests" element={<OutProdReq />} />
+        <Route path="/products/buyed" element={<BuyedProds />} />
+        <Route path="/myproducts/sold" element={<SoldProds />} />
         {/* <Route path="/home/registration" element={<Registration />} />
         <Route path="/course/running" element={<RunCourse />} />
         <Route path="/course/running/:dept_name" element={<RunDeptCourse />} />

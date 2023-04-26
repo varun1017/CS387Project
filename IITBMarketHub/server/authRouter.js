@@ -5,6 +5,44 @@ const validatesellForm = require("./controllers/validatesellForm");
 const router = express.Router();
 const pool = require("./db");
 const bcrypt = require("bcrypt");
+// const multer = require('multer');
+
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, 'images/')
+//   },
+//   filename: (req, file, cb) => {
+//     cb(null, file.originalname)
+//   },
+// });
+
+// const upload = multer({ storage: storage });
+
+
+// // Define storage for uploaded images
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, 'uploads/');
+//   },
+//   filename: function (req, file, cb) {
+//     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+//     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+//   }
+// });
+
+// // Create multer middleware for file uploads
+// const upload = multer({
+//   storage: storage,
+//   limits: {
+//     fileSize: 1024 * 1024 * 5 // 5 MB
+//   },
+//   fileFilter: function (req, file, cb) {
+//     if (!file.mimetype.startsWith('image/')) {
+//       return cb(new Error('Only image files are allowed'));
+//     }
+//     cb(null, true);
+//   }
+// });
 
 router.route("/login")
   .get(async (req, res) => {
@@ -83,19 +121,190 @@ router.post("/signup", async (req, res) => {
     res.end();
   });
 
-  router.post("/sell", async (req, res) =>{
+  router.post("/sell",async (req, res) =>{
     // validatesellForm(req, {});
-    console.log(res.req.body);
-    console.log(req.session.user);
-    console.log("fv");
+    // console.log(res);
+    // console.log("-----------------------------------------------------------------------------------------------------1");
+    // console.log(req);
+    // console.log("------------------------------------------------------------------------------------------------------2");
+    // console.log(req.session.user);
+    // console.log("fv");
+    // console.log(req.files);
+    // console.log("-----------------3");
+    // console.log(res.req.files);
+    // console.log("--------------4");
+    // console.log("--------------------------------------------------------0");
+    // console.log(res);
+    // console.log("---------------------------------------------------------1");
+    // console.log(res.req.body);
+    // console.log("---------------------------------------------------------2");
+    // console.log(req.session);
+    // console.log("---------------------------------------------------------3");
+    // console.log(res);
     var fb = {};
     const query = await pool.query(
       "INSERT INTO products(seller_id,prod_name,prod_desc,category_id,price,prod_expdate) values ($1,$2,$3,$4,$5,$6);",
       [req.session.user.userid,res.req.body.prodName,res.req.body.prodDesc,res.req.body.category,res.req.body.price,res.req.body.prodExpDate]
     );
-    fb = {1:'var0'}
+    fb = {1:'var0'};
     res.json(fb);
     res.end();
   });
+
+  router.route("/products").get(async (req,res) => {
+    // validateForm(req,{});
+  
+    const query = await pool.query(
+      "select prod_id,seller_id,prod_name,prod_desc,cat_name,price,prod_expdate,created_at from products natural join category where products.seller_id != $1 and buyer_id IS NULL;",
+      [req.session.user.userid]
+    );
+  
+    console.log(query.rows);
+  
+    res.json(query.rows);
+    res.end();
+  
+  });
+
+  router.route("/myproducts").get(async (req,res) => {
+    // validateForm(req,{});
+  
+    const query = await pool.query(
+      "select prod_id,seller_id,prod_name,prod_desc,cat_name,price,prod_expdate,created_at from products natural join category where products.seller_id = $1;",
+      [req.session.user.userid]
+    );
+  
+    console.log(query.rows);
+  
+    res.json(query.rows);
+    res.end();
+  
+  });
+
+  router.route("/reqproduct").post(async (req, res) => {
+    // validateForm(req, {});
+    console.log(res.req.body.prod_id);
+    console.log(res.req.body.seller_id);
+    // var quer1 = res.json();
+    // console.log(quer1.rows); 
+    var fb = {};
+  
+    fb = {1:'var0'}
+
+    const query0 = await pool.query(
+      "select exists(select 1 from product_requests where product_id=$1 and seller_id=$2 and buyer_id=$3);",
+      [res.req.body.prod_id,res.req.body.seller_id,req.session.user.userid]
+    );
+
+    console.log(query0.rows[0].exists);
+    if(query0.rows[0].exists==0){
+      console.log("hi");
+      const query = await pool.query(
+        "INSERT INTO product_requests(product_id,seller_id,buyer_id) VALUES ($1,$2,$3);",
+        [res.req.body.prod_id,res.req.body.seller_id,req.session.user.userid]
+      );
+      fb = {1:'var1'};
+    }
+
+    // if(query.rows[0].result == 'TRUE'){
+    //   fb = {1:'var1'}
+    // }
+    // if(query.rows[0].result == 'FALSE'){
+    //   fb = {1:'var2'}
+    // }
+    // console.log(query0.rows[0]);
+    res.json(fb);
+    res.end();
+  });
+
+
+  router.route("/products/inreq").get(async (req,res) => {
+    // validateForm(req,{});
+  
+    const query = await pool.query(
+      "select prod_id,prod_name,prod_desc,cat_name,price,product_requests.buyer_id from (products natural join category),product_requests where products.prod_id = product_requests.product_id and products.seller_id = product_requests.seller_id and product_requests.seller_id = $1 and products.buyer_id IS NULL;",
+      [req.session.user.userid]
+    );
+  
+    console.log(query.rows);
+  
+    res.json(query.rows);
+    res.end();
+  
+  });
+
+  router.route("/products/outreq").get(async (req,res) => {
+    // validateForm(req,{});
+  
+    const query = await pool.query(
+      "select prod_id,prod_name,prod_desc,cat_name,price,product_requests.seller_id from (products natural join category),product_requests where products.prod_id = product_requests.product_id and products.seller_id = product_requests.seller_id and product_requests.buyer_id = $1 and products.buyer_id IS NULL;",
+      [req.session.user.userid]
+    );
+  
+    console.log(query.rows);
+  
+    res.json(query.rows);
+    res.end();
+  
+  });
+
+  router.route("/myproducts/confirm").post(async (req, res) => {
+    // validateForm(req, {});
+    console.log(res.req.body.prod_id);
+    console.log(res.req.body.buyer_id);
+    // var quer1 = res.json();
+    // console.log(quer1.rows); 
+    var fb = {};
+  
+    fb = {1:'var0'}
+    const query = await pool.query(
+      "UPDATE products set buyer_id = $1 where prod_id = $2;",
+      [res.req.body.buyer_id,res.req.body.prod_id]
+    );
+    // console.log(query0.rows[0]);
+    res.json(fb);
+    res.end();
+  });
+
+  router.route("/products/sold").get(async (req,res) => {
+    // validateForm(req,{});
+  
+    const query = await pool.query(
+      "select prod_id,prod_name,prod_desc,cat_name,price,buyer_id from (products natural join category) where seller_id = $1 and buyer_id IS NOT NULL;",
+      [req.session.user.userid]
+    );
+  
+    console.log(query.rows);
+  
+    res.json(query.rows);
+    res.end();
+  
+  });
+
+  router.route("/products/buyed").get(async (req,res) => {
+    // validateForm(req,{});
+  
+    const query = await pool.query(
+      "select prod_id,prod_name,prod_desc,cat_name,price,seller_id from (products natural join category) where buyer_id = $1;",
+      [req.session.user.userid]
+    );
+  
+    console.log(query.rows);
+  
+    res.json(query.rows);
+    res.end();
+  
+  });
+
+  router.route("/logout").get(async (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return console.log(err);
+        }
+        });
+    res.json({ loggedIn: false });
+    res.end();
+  });
+
 
 module.exports = router;
