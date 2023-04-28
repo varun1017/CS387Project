@@ -48,6 +48,12 @@ const Home = () => {
           <Button style={{fontSize: 20}} onClick={() => navigate("/products/buyed")}>Buyed Products</Button>
         </ButtonGroup>
 
+        <h1 style={{textAlign: "center",fontSize: 40}}>Image section</h1>
+        <ButtonGroup>
+          <Button style={{fontSize: 20}} onClick={() => navigate("/image/input")}>Upload Image</Button>
+          <Button style={{fontSize: 20}} onClick={() => navigate("/image/output")}>View Image</Button>
+        </ButtonGroup>
+
         <h1 style={{textAlign: "center",fontSize: 40}}>Logout</h1>
         <ButtonGroup>
         <Button style={{fontSize: 20}} onClick={logout}>logout</Button>

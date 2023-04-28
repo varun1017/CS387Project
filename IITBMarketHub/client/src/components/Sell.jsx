@@ -11,7 +11,7 @@ const Sell = () => {
     const [category, setCategory] = useState("");
     const [price, setPrice] = useState("");
     const [prodExpDate, setProdExpDate] = useState("");
-    const [images, setImages] = useState([]);
+    const [photo, setPhoto] = useState('');
     // const [image, setImage] = useState({ preview: '', data: '' });
     const [status, setStatus] = useState('');
     const toast = useToast();
@@ -26,76 +26,54 @@ const Sell = () => {
 const handleSubmit = async (event) => {
   event.preventDefault();
 
-  // const formData = new FormData();
-  // formData.append("prod_name", prodName);
-  // formData.append("prod_desc", prodDesc);
-  // formData.append("category_id", category);
-  // formData.append("price", price);
-  // formData.append("prodExpDate", prodExpDate);
-
-  // for (const image of images) {
-  //   formData.append("product_images", image);
-  // }
-
-  // console.log(formData);
+  const formData = new FormData();
+  formData.append("prodName", prodName);
+  formData.append("prodDesc", prodDesc);
+  formData.append("category", category);
+  formData.append("price", price);
+  formData.append("prodExpDate", prodExpDate);
+  formData.append("photo", photo);
 
   try{
-    // const formData = new FormData();
-    // formData.append('prodName', prodName);
-    // formData.append('prodDesc', prodDesc);
-    // formData.append('category', category);
-    // formData.append('price', price);
-    // formData.append('prodExpDate', prodExpDate);
-    // formData.append("images", images[0].data);
-    // for (let i = 0; i < images.length; i++) {
-    //   formData.append(`image_${i}`, images[i]);
-    // }
-
-    // for (var pair of formData.entries()) {
-    //   console.log(pair[0]+ ', ' + pair[1]); 
-    // }
     
+    const response = await axios.post(
+      "http://localhost:4000/auth/sell",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
+      }
+    );
+
+    toast({
+      title: "Image uploaded",
+      description: "Your image has been uploaded successfully.",
+      status: "success",
+      duration: 5000,
+      isClosable: true,
+    });
+    // const body = { prodName,prodDesc,category,price,prodExpDate };
+    // console.log(body);
     // const response = await fetch("http://localhost:4000/auth/sell", {
     //   credentials: 'include',
     //   method: "POST",
-    //   body: formData,
-    //   headers: { 'Content-Type': 'multipart/form-data' },
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify(body),
     // });
 
-    const body = { prodName,prodDesc,category,price,prodExpDate };
-    console.log(body);
-    const response = await fetch("http://localhost:4000/auth/sell", {
-      credentials: 'include',
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
+    // const data = await response.json();
 
-    const data = await response.json();
-
-    // let formData = new FormData();
-    // formData.append('file', image.data);
-    // const response1 = await fetch("http://localhost:4000/auth/sell", {
-    //   method: 'POST',
-    //   body1: formData,
-    // });
-    // if (response1) setStatus(response.statusText);
-
-    if(response.ok){
-      console.log(data);
-      alert(`Successfully uploaded`);
-      navigate('/home');
-    }
-    else {
-      throw new Error("Fail");
-    }
-    // toast({
-    //   title: "Product uploaded!",
-    //   description: response.data.message,
-    //   status: "success",
-    //   duration: 5000,
-    //   isClosable: true,
-    // });
+    // if(response.ok){
+    //   console.log(data);
+    //   alert(`Successfully uploaded`);
+    //   navigate('/home');
+    // }
+    // else {
+    //   throw new Error("Fail");
+    // }
+    
   }
   catch(err){
     console.error(err.message);
@@ -157,16 +135,25 @@ const handleSubmit = async (event) => {
 // }, []);
 
 
-const handleImageUpload = (e) => {
-  const uploadedImages = Array.from(e.target.files).map((file) => {
-    const img = {
-      preview: URL.createObjectURL(file),
-      data: file,
-    };
-    return img;
-  });
-  setImages(uploadedImages);
-};
+// const handleImageUpload = (e) => {
+  // const uploadedImages = Array.from(e.target.files).map((file) => {
+    // const img = {
+      // preview: URL.createObjectURL(file),
+      // data: file,
+    // };
+    // return img;
+  // });
+  // setImages(uploadedImages);
+// };
+
+// const handleImageUpload = (e) => {
+//   const uploadedImages = Array.from(e.target.files);
+//   const formData = new FormData();
+//   uploadedImages.forEach((image, index) => {
+//     formData.append(`image_${index}`, image);
+//   });
+//   // Send the formData object to the server
+// };
 
 
 const getProfile = async () => {
@@ -242,15 +229,22 @@ const getProfile = async () => {
               onChange={(event) => setProdExpDate(event.target.value)}
             />
         </FormControl>
-        {/* <FormControl mb="3">
-          <FormLabel>Images</FormLabel>
-          <Input type="file" multiple onChange={handleImageUpload} />
-          {images.length > 0 && (
+         {/* <FormControl mb="3">
+         <FormLabel>Images</FormLabel>
+           <Input type="file" multiple onChange={handleImageUpload} />
+           {images.length > 0 && (
             <Text fontSize="sm" mt="2">
               {images.length} image{images.length > 1 && "s"} selected
             </Text>
           )}
-        </FormControl> */}
+        </FormControl>  */}
+          <div>
+            <label for="photo">Choose a photo:</label>
+            <input type="file" id="photo" name="photo" accept="image/*"
+            onChange={(event)=>setPhoto(event.target.files[0])}
+            required/>
+          </div>
+
         {/* <input type='file' name='file' onChange={handleImageUpload}></input> */}
         <Button colorScheme="blue" type="submit">
           Upload Product

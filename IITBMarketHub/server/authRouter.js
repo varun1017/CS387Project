@@ -5,44 +5,25 @@ const validatesellForm = require("./controllers/validatesellForm");
 const router = express.Router();
 const pool = require("./db");
 const bcrypt = require("bcrypt");
-// const multer = require('multer');
-
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, 'images/')
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, file.originalname)
-//   },
-// });
-
-// const upload = multer({ storage: storage });
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
 
-// // Define storage for uploaded images
-// const storage = multer.diskStorage({
-//   destination: function (req, file, cb) {
-//     cb(null, 'uploads/');
-//   },
-//   filename: function (req, file, cb) {
-//     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-//     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-//   }
-// });
 
-// // Create multer middleware for file uploads
-// const upload = multer({
-//   storage: storage,
-//   limits: {
-//     fileSize: 1024 * 1024 * 5 // 5 MB
-//   },
-//   fileFilter: function (req, file, cb) {
-//     if (!file.mimetype.startsWith('image/')) {
-//       return cb(new Error('Only image files are allowed'));
-//     }
-//     cb(null, true);
-//   }
-// });
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+      cb(null, 'Images/')
+  },
+  filename: (req, file, cb) => {
+    console.log("image uploading",file);
+      cb(null, req.session.user.userid+"_"+Date.now()+"_"+file.originalname)
+  },
+});
+
+const upload = multer({storage: storage});
+
 
 router.route("/login")
   .get(async (req, res) => {
@@ -121,7 +102,7 @@ router.post("/signup", async (req, res) => {
     res.end();
   });
 
-  router.post("/sell",async (req, res) =>{
+  router.post("/sell",upload.fields([{name:'photo',maxCount: 1}]),async (req, res) =>{
     // validatesellForm(req, {});
     // console.log(res);
     // console.log("-----------------------------------------------------------------------------------------------------1");
@@ -142,14 +123,35 @@ router.post("/signup", async (req, res) => {
     // console.log("---------------------------------------------------------3");
     // console.log(res);
     var fb = {};
+    console.log(res.req);
+    console.log(res.req.files);
+    const photoFile = req.files.photo[0];
+    console.log(photoFile);
+    const photoData = fs.readFileSync(photoFile.path);
     const query = await pool.query(
-      "INSERT INTO products(seller_id,prod_name,prod_desc,category_id,price,prod_expdate) values ($1,$2,$3,$4,$5,$6);",
-      [req.session.user.userid,res.req.body.prodName,res.req.body.prodDesc,res.req.body.category,res.req.body.price,res.req.body.prodExpDate]
+      "INSERT INTO products(seller_id,prod_name,prod_desc,category_id,price,prod_expdate,product_image) values ($1,$2,$3,$4,$5,$6,$7);",
+      [req.session.user.userid,res.req.body.prodName,res.req.body.prodDesc,res.req.body.category,res.req.body.price,res.req.body.prodExpDate,photoData]
     );
     fb = {1:'var0'};
     res.json(fb);
     res.end();
   });
+
+  // router.post("/upload/image",upload.fields([{name:'photo',maxCount: 1}]), async(req, res) =>{
+  //   console.log("-----------------------------1");
+  //   console.log(res.req.files);
+  //   const photoFile = req.files.photo[0];
+  //   console.log(photoFile);
+  //   const photoData = fs.readFileSync(photoFile.path);
+  //   console.log(photoData);
+  //   var fb = {};
+  //   // const query = await pool.query(
+      
+  //   // );
+  //   fb = {1:'var0'};
+  //   res.json(fb);
+  //   res.end();
+  // });
 
   router.route("/products").get(async (req,res) => {
     // validateForm(req,{});

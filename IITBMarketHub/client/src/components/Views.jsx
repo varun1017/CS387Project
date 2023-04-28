@@ -13,6 +13,8 @@ import InProdReq from "./InProdReq";
 import OutProdReq from "./OutProdReq";
 import BuyedProds from "./BuyedProds";
 import SoldProds from "./SoldProds";
+import ImageIN from "./ImageIN";
+import ImageOUT from "./ImageOUT";
 
 
 const Views = () => {
@@ -35,6 +37,8 @@ const Views = () => {
         <Route path="/products/myrequests" element={<OutProdReq />} />
         <Route path="/products/buyed" element={<BuyedProds />} />
         <Route path="/myproducts/sold" element={<SoldProds />} />
+        <Route path="/image/input" element={<ImageIN />} />
+        <Route path="/image/output" element={<ImageOUT />} />
         {/* <Route path="/home/registration" element={<Registration />} />
         <Route path="/course/running" element={<RunCourse />} />
         <Route path="/course/running/:dept_name" element={<RunDeptCourse />} />

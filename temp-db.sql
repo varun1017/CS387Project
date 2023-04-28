@@ -30,7 +30,7 @@ create table products
         buyer_id    varchar(9) default null,
         price       varchar(7) not null,
         prod_expdate timestamp,
-        product_images JSON CHECK (json_array_length(product_images) <=6),
+        product_image bytea,
         created_at   timestamp default now(),
         primary key (prod_id),
         foreign key(seller_id) references users(user_id),
@@ -49,3 +49,17 @@ create table product_requests
         foreign key(seller_id) references users(user_id),
         foreign key(buyer_id) references users(user_id)
     );
+
+insert into category (category_id, cat_name) values (1, 'Electronics');
+insert into category (category_id, cat_name) values (2, 'Furniture');
+insert into category (category_id, cat_name) values (3, 'Books');
+insert into category (category_id, cat_name) values (4, 'Clothes');
+insert into category (category_id, cat_name) values (5, 'Others');
+```
+I am trying to insert a row into the table `products` using the following query:
+```
+```
+insert users 
+```
+
+
