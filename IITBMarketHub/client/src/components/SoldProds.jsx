@@ -61,6 +61,7 @@ const SoldProds = () => {
             <div>
         <ButtonGroup>
           <Button style={{fontSize: 20}} onClick={() => navigate("/home")}>Home</Button>
+          <Button style={{textAlign: "center", fontSize: 20}} onClick={() => navigate("/myprofile")}>View Profile</Button>
         </ButtonGroup>
             <h1 style={{textAlign: "center",fontSize: 40}}>Products Sold by Me</h1>
             <table className="table mt-5 text-center">
@@ -69,21 +70,23 @@ const SoldProds = () => {
                 <th>Product ID</th>
                 <th>Category</th>
                 <th>Product Name</th>
-                <th>Product Description</th>
+                {/* <th>Product Description</th> */}
                 <th>Price</th>
                 <th>Buyer ID</th>
+                <th>View</th>
                 {/* <th>Requests</th> */}
             </tr>
             </thead>
             <tbody>
               {prods.map((prod)=>(
-                  <tr key={prod.prod_id+prod.cat_name+prod.prod_name}>
+                  <tr key={prod.prod_id+prod.category_name+prod.prod_name}>
                     <td>{prod.prod_id}</td>
-                    <td>{prod.cat_name}</td>
+                    <td>{prod.category_name}</td>
                     <td>{prod.prod_name}</td>
-                    <td>{prod.prod_desc}</td>
+                    {/* <td>{prod.prod_desc}</td> */}
                     <td>{prod.price}</td>
                     <td>{prod.buyer_id}</td>
+                    <td><Button style={{fontSize: 15}} onClick={() => navigate(`/product/${prod.prod_id}`)}>View Full</Button></td>
                     {/* <td><button onClick={() => handleProdReq(prod['prod_id'],prod['seller_id'])}>Request</button></td> */}
                   </tr>
               ))}

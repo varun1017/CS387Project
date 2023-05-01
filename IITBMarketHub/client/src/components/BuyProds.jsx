@@ -41,49 +41,48 @@ const BuyProds = () => {
         }
       };
 
-
-    
+   
     useEffect(() => {
         getAllProds();
     }, []);
 
-    const handleProdReq = async(prod_id,seller_id) => {
-      // e.preventDefault();
-      try{
+  //   const handleProdReq = async(prod_id,seller_id) => {
+  //     // e.preventDefault();
+  //     try{
   
-          const body = { prod_id,seller_id };
-          console.log(body);
-          const response = await fetch("http://localhost:4000/auth/reqproduct", {
-          credentials: 'include',
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-          });
-          const data = await response.json();
-          // console.log(data);
-          if (response.ok) {
-              // window.location.reload();
-              // alert(`You have Successfully Registered Course:${c_id}, Section:${cs_id} `);
-              console.log(data[1]);
-              if(data[1]==='var1'){
-                  // alert(`You have already registered for this course`);
-                  alert(`Request successful for product_id:${prod_id}`);
-                  navigate('/home');
-              }
-              if(data[1]=='var0'){
-                alert(`Already Requested for product_id:${prod_id}`);
-                navigate('/home');                
-              }
-            } else {
-              throw new Error("Failed to request");
-            }
-      }
-      catch(err){
-          console.error(err.message);
-      }
+  //         const body = { prod_id,seller_id };
+  //         console.log(body);
+  //         const response = await fetch("http://localhost:4000/auth/reqproduct", {
+  //         credentials: 'include',
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify(body),
+  //         });
+  //         const data = await response.json();
+  //         // console.log(data);
+  //         if (response.ok) {
+  //             // window.location.reload();
+  //             // alert(`You have Successfully Registered Course:${c_id}, Section:${cs_id} `);
+  //             console.log(data[1]);
+  //             if(data[1]==='var1'){
+  //                 // alert(`You have already registered for this course`);
+  //                 alert(`Request successful for product_id:${prod_id}`);
+  //                 navigate('/home');
+  //             }
+  //             if(data[1]=='var0'){
+  //               alert(`Already Requested for product_id:${prod_id}`);
+  //               navigate('/home');                
+  //             }
+  //           } else {
+  //             throw new Error("Failed to request");
+  //           }
+  //     }
+  //     catch(err){
+  //         console.error(err.message);
+  //     }
     
 
-  };
+  // };
 
     // const logout = (e) => {
     //     e.preventDefault();
@@ -98,6 +97,7 @@ const BuyProds = () => {
             <div>
             <ButtonGroup>
             <Button style={{fontSize: 20}} onClick={() => navigate("/home")}>Home</Button>
+            <Button style={{textAlign: "center", fontSize: 20}} onClick={() => navigate("/myprofile")}>View Profile</Button>
           </ButtonGroup>
             <h1 style={{textAlign: "center",fontSize: 40}}>Buy Products</h1>
             <table className="table mt-5 text-center">
@@ -106,22 +106,20 @@ const BuyProds = () => {
                 <th>Product ID</th>
                 <th>Category</th>
                 <th>Product Name</th>
-                <th>Product Description</th>
-                <th>seller ID</th>
                 <th>Price</th>
-                <th>Requests</th>
+                <th>View</th>
+                {/* <th>Requests</th> */}
             </tr>
             </thead>
             <tbody>
               {prods.map((prod)=>(
-                  <tr key={prod.prod_id+prod.cat_name+prod.prod_name}>
+                  <tr key={prod.prod_id+prod.category_name+prod.prod_name}>
                     <td>{prod.prod_id}</td>
-                    <td>{prod.cat_name}</td>
+                    <td>{prod.category_name}</td>
                     <td>{prod.prod_name}</td>
-                    <td>{prod.prod_desc}</td>
-                    <td>{prod.seller_id}</td>
                     <td>{prod.price}</td>
-                    <td><button onClick={() => handleProdReq(prod['prod_id'],prod['seller_id'])}>Request</button></td>
+                    <td><Button style={{fontSize: 15}} onClick={() => navigate(`/product/${prod.prod_id}`)}>View Full</Button></td>
+                    {/* <td><button onClick={() => handleProdReq(prod['prod_id'],prod['seller_id'])}>Request</button></td> */}
                   </tr>
               ))}
       

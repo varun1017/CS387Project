@@ -5,44 +5,24 @@ const validatesellForm = require("./controllers/validatesellForm");
 const router = express.Router();
 const pool = require("./db");
 const bcrypt = require("bcrypt");
-// const multer = require('multer');
-
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, 'images/')
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, file.originalname)
-//   },
-// });
-
-// const upload = multer({ storage: storage });
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
 
-// // Define storage for uploaded images
-// const storage = multer.diskStorage({
-//   destination: function (req, file, cb) {
-//     cb(null, 'uploads/');
-//   },
-//   filename: function (req, file, cb) {
-//     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-//     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-//   }
-// });
 
-// // Create multer middleware for file uploads
-// const upload = multer({
-//   storage: storage,
-//   limits: {
-//     fileSize: 1024 * 1024 * 5 // 5 MB
-//   },
-//   fileFilter: function (req, file, cb) {
-//     if (!file.mimetype.startsWith('image/')) {
-//       return cb(new Error('Only image files are allowed'));
-//     }
-//     cb(null, true);
-//   }
-// });
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+      cb(null, 'Images/')
+  },
+  filename: (req, file, cb) => {
+    console.log("image uploading",file);
+      cb(null, req.session.user.userid+"_"+Date.now()+"_"+file.originalname)
+  },
+});
+
+const upload = multer({storage: storage});
 
 router.route("/login")
   .get(async (req, res) => {
@@ -114,37 +94,23 @@ router.post("/signup", async (req, res) => {
     validateloginForm(req, {});
     // console.log(req.session);
     const query1 = await pool.query(
-      "select user_name from users where user_id = $1",
+      "select user_id,email,user_name,ph_num,user_address from users where user_id = $1",
       [req.session.user.userid]
     );
-    res.json([query1.rows]);
+    res.json(query1.rows);
     res.end();
   });
 
-  router.post("/sell",async (req, res) =>{
-    // validatesellForm(req, {});
-    // console.log(res);
-    // console.log("-----------------------------------------------------------------------------------------------------1");
-    // console.log(req);
-    // console.log("------------------------------------------------------------------------------------------------------2");
-    // console.log(req.session.user);
-    // console.log("fv");
-    // console.log(req.files);
-    // console.log("-----------------3");
-    // console.log(res.req.files);
-    // console.log("--------------4");
-    // console.log("--------------------------------------------------------0");
-    // console.log(res);
-    // console.log("---------------------------------------------------------1");
-    // console.log(res.req.body);
-    // console.log("---------------------------------------------------------2");
-    // console.log(req.session);
-    // console.log("---------------------------------------------------------3");
-    // console.log(res);
+  router.post("/sell",upload.fields([{name:'photo',maxCount: 1}]),async (req, res) =>{
     var fb = {};
+    console.log(res.req);
+    console.log(res.req.files);
+    const photoFile = req.files.photo[0];
+    console.log(photoFile);
+    const photoData = fs.readFileSync(photoFile.path);
     const query = await pool.query(
-      "INSERT INTO products(seller_id,prod_name,prod_desc,category_id,price,prod_expdate) values ($1,$2,$3,$4,$5,$6);",
-      [req.session.user.userid,res.req.body.prodName,res.req.body.prodDesc,res.req.body.category,res.req.body.price,res.req.body.prodExpDate]
+      "INSERT INTO products(seller_id,prod_name,prod_desc,category_name,price,prod_expdate,product_image) values ($1,$2,$3,$4,$5,$6,$7);",
+      [req.session.user.userid,res.req.body.prodName,res.req.body.prodDesc,res.req.body.category,res.req.body.price,res.req.body.prodExpDate,photoData]
     );
     fb = {1:'var0'};
     res.json(fb);
@@ -152,10 +118,9 @@ router.post("/signup", async (req, res) => {
   });
 
   router.route("/products").get(async (req,res) => {
-    // validateForm(req,{});
-  
+
     const query = await pool.query(
-      "select prod_id,seller_id,prod_name,prod_desc,cat_name,price,prod_expdate,created_at from products natural join category where products.seller_id != $1 and buyer_id IS NULL;",
+      "select prod_id,seller_id,prod_name,prod_desc,category_name,price,prod_expdate,created_at from products where seller_id != $1 and buyer_id IS NULL;",
       [req.session.user.userid]
     );
   
@@ -166,11 +131,29 @@ router.post("/signup", async (req, res) => {
   
   });
 
+  router.route("/products/buy/:category_name").get(async (req,res) => {
+    // validateForm(req,{});
+
+    const { category_name } = req.params;
+  
+    const query = await pool.query(
+      "select prod_id,seller_id,prod_name,prod_desc,price,prod_expdate,created_at from products where seller_id != $1 and category_name = $2 and buyer_id IS NULL;",
+      [req.session.user.userid,category_name]
+    );
+  
+    console.log(query.rows);
+  
+    res.json(query.rows);
+    res.end();
+  
+  });
+
+
   router.route("/myproducts").get(async (req,res) => {
     // validateForm(req,{});
   
     const query = await pool.query(
-      "select prod_id,seller_id,prod_name,prod_desc,cat_name,price,prod_expdate,created_at from products natural join category where products.seller_id = $1;",
+      "select prod_id,seller_id,prod_name,prod_desc,category_name,price,prod_expdate,created_at from products where seller_id = $1 and buyer_id is NULL;",
       [req.session.user.userid]
     );
   
@@ -222,7 +205,7 @@ router.post("/signup", async (req, res) => {
     // validateForm(req,{});
   
     const query = await pool.query(
-      "select prod_id,prod_name,prod_desc,cat_name,price,product_requests.buyer_id from (products natural join category),product_requests where products.prod_id = product_requests.product_id and products.seller_id = product_requests.seller_id and product_requests.seller_id = $1 and products.buyer_id IS NULL;",
+      "select prod_id,prod_name,prod_desc,category_name,price,product_requests.buyer_id from products,product_requests where products.prod_id = product_requests.product_id and products.seller_id = product_requests.seller_id and product_requests.seller_id = $1 and products.buyer_id IS NULL;",
       [req.session.user.userid]
     );
   
@@ -237,7 +220,7 @@ router.post("/signup", async (req, res) => {
     // validateForm(req,{});
   
     const query = await pool.query(
-      "select prod_id,prod_name,prod_desc,cat_name,price,product_requests.seller_id from (products natural join category),product_requests where products.prod_id = product_requests.product_id and products.seller_id = product_requests.seller_id and product_requests.buyer_id = $1 and products.buyer_id IS NULL;",
+      "select prod_id,prod_name,prod_desc,category_name,price,product_requests.seller_id from products,product_requests where products.prod_id = product_requests.product_id and products.seller_id = product_requests.seller_id and product_requests.buyer_id = $1 and products.buyer_id IS NULL;",
       [req.session.user.userid]
     );
   
@@ -261,6 +244,30 @@ router.post("/signup", async (req, res) => {
       "UPDATE products set buyer_id = $1 where prod_id = $2;",
       [res.req.body.buyer_id,res.req.body.prod_id]
     );
+
+    const query1 = await pool.query(
+      "DELETE FROM product_requests where product_id = $1 and seller_id = $2;",
+      [res.req.body.prod_id,req.session.user.userid]
+    );
+    // console.log(query0.rows[0]);
+    res.json(fb);
+    res.end();
+  });
+
+  router.route("/myproducts/delete").post(async (req, res) => {
+    // validateForm(req, {});
+    console.log(res.req.body.prod_id);
+    console.log(res.req.body.buyer_id);
+    // var quer1 = res.json();
+    // console.log(quer1.rows); 
+    var fb = {};
+  
+    fb = {1:'var0'}
+
+    const query = await pool.query(
+      "DELETE FROM product_requests where product_id = $1 and seller_id = $2 and buyer_id = $3;",
+      [res.req.body.prod_id,req.session.user.userid,res.req.body.buyer_id]
+    );
     // console.log(query0.rows[0]);
     res.json(fb);
     res.end();
@@ -270,7 +277,7 @@ router.post("/signup", async (req, res) => {
     // validateForm(req,{});
   
     const query = await pool.query(
-      "select prod_id,prod_name,prod_desc,cat_name,price,buyer_id from (products natural join category) where seller_id = $1 and buyer_id IS NOT NULL;",
+      "select prod_id,prod_name,prod_desc,category_name,price,buyer_id from products where seller_id = $1 and buyer_id IS NOT NULL;",
       [req.session.user.userid]
     );
   
@@ -285,7 +292,7 @@ router.post("/signup", async (req, res) => {
     // validateForm(req,{});
   
     const query = await pool.query(
-      "select prod_id,prod_name,prod_desc,cat_name,price,seller_id from (products natural join category) where buyer_id = $1;",
+      "select prod_id,prod_name,prod_desc,category_name,price,seller_id from products where buyer_id = $1;",
       [req.session.user.userid]
     );
   
@@ -294,6 +301,45 @@ router.post("/signup", async (req, res) => {
     res.json(query.rows);
     res.end();
   
+  });
+
+  router.route("/image/product/:product_id").post(async(req,res)=>{
+    
+    const { product_id } = req.params;
+    
+    const query = await pool.query(
+      "select product_image from products where prod_id=$1;",
+      [product_id]
+    );
+
+    const key = Object.keys(query.rows[0])[0];
+    console.log(Object.values(query.rows[0])[0]);
+
+    // console.log(query.rows[0]);
+
+    res.send(Object.values(query.rows[0])[0]);
+    res.end();
+
+  });
+
+  router.route("/product/:product_id").get(async(req,res)=>{
+    
+    const { product_id } = req.params;
+    
+    const query = await pool.query(
+      "select prod_id,seller_id,prod_name,prod_desc,category_name,buyer_id,price,prod_expdate,created_at from products where prod_id=$1;",
+      [product_id]
+    );
+
+    // const key = Object.keys(query.rows[0])[0];
+    // console.log(Object.values(query.rows[0])[0]);
+    console.log(query.rows);
+    // console.log(query.rows[0]);
+    res.json(query.rows);
+    
+    // res.send(Object.values(query.rows[0])[0]);
+    res.end();
+
   });
 
   router.route("/logout").get(async (req, res) => {

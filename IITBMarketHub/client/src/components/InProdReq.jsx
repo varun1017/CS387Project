@@ -81,6 +81,41 @@ const InProdReq = () => {
   
     };
 
+    const handleDelete = async(prod_id,buyer_id) => {
+      // e.preventDefault();
+      try{
+  
+          const body = { prod_id,buyer_id };
+          console.log(body);
+          const response = await fetch("http://localhost:4000/auth/myproducts/delete", {
+          credentials: 'include',
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+          });
+          const data = await response.json();
+          // console.log(data);
+          if (response.ok) {
+              // window.location.reload();
+              // alert(`You have Successfully Registered Course:${c_id}, Section:${cs_id} `);
+              console.log(data[1]);
+              if(data[1]==='var0'){
+                  // alert(`You have already registered for this course`);
+                  alert(`Deleted request from BuyerID:${buyer_id} for ProductID:${prod_id}`);
+                  navigate('/home');
+              }
+            } else {
+              throw new Error("Failed to request");
+            }
+      }
+      catch(err){
+          console.error(err.message);
+      }
+    
+
+  };
+
+
     // const logout = (e) => {
     //     e.preventDefault();
     //     axios.get("http://localhost:4000/auth/logout", {withCredentials:true}).then( (res) =>{
@@ -94,6 +129,7 @@ const InProdReq = () => {
             <div>
         <ButtonGroup>
           <Button style={{fontSize: 20}} onClick={() => navigate("/home")}>Home</Button>
+          <Button style={{textAlign: "center", fontSize: 20}} onClick={() => navigate("/myprofile")}>View Profile</Button>
         </ButtonGroup>
             <h1 style={{textAlign: "center",fontSize: 40}}>Requests of My Products</h1>
             <table className="table mt-5 text-center">
@@ -105,19 +141,23 @@ const InProdReq = () => {
                 <th>Product Description</th>
                 <th>Price</th>
                 <th>Requester ID</th>
+                <th>View</th>
                 <th>Confirm Requests</th>
+                <th>Delete Requests</th>
             </tr>
             </thead>
             <tbody>
               {prods.map((prod)=>(
-                  <tr key={prod.prod_id+prod.cat_name+prod.prod_name}>
+                  <tr key={prod.prod_id+prod.category_name+prod.prod_name}>
                     <td>{prod.prod_id}</td>
-                    <td>{prod.cat_name}</td>
+                    <td>{prod.category_name}</td>
                     <td>{prod.prod_name}</td>
                     <td>{prod.prod_desc}</td>
                     <td>{prod.price}</td>
                     <td>{prod.buyer_id}</td>
+                    <td><Button style={{fontSize: 15}} onClick={() => navigate(`/product/${prod.prod_id}`)}>View Full</Button></td>
                     <td><button onClick={() => handleConfirm(prod['prod_id'],prod['buyer_id'])}>Confirm</button></td>
+                    <td><button onClick={() => handleDelete(prod['prod_id'],prod['buyer_id'])}>Delete</button></td>
                   </tr>
               ))}
       
